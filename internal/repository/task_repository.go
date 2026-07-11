@@ -6,6 +6,14 @@ import (
 	"github.com/sepiruss/task-api/internal/model"
 )
 
+type TaskRepositoryInterface interface {
+	GetAll() ([]model.Task, error)
+	GetByID(id int) (*model.Task, error)
+	Create(task *model.Task) error
+	Update(task *model.Task) error
+	Delete(id int) error
+}
+
 type TaskRepository struct {
 	db *sql.DB
 }
