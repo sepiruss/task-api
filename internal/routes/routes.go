@@ -14,7 +14,7 @@ func RegisterRoutes(mux *http.ServeMux, taskHandler *handler.TaskHandler) {
 
 	mux.HandleFunc("POST /tasks", taskHandler.Create)
 
-	mux.HandleFunc("PUT /tasks/{id}", taskHandler.Update)
+	//mux.HandleFunc("PUT /tasks/{id}", taskHandler.Update)
 
-	mux.HandleFunc("DELETE /tasks/{id}", taskHandler.Delete)
+	//mux.HandleFunc("DELETE /tasks/{id}", taskHandler.Delete)
 }

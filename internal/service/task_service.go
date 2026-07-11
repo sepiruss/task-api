@@ -28,3 +28,9 @@ func (s *TaskService) Create(task *model.Task) error {
 	}
 	return s.repo.Create(task)
 }
+
+func (s *TaskService) GetByID(id int) (*model.Task, error) {
+
+	return s.repo.GetByID(id)
+
+}

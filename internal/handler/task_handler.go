@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/sepiruss/task-api/internal/model"
 	"github.com/sepiruss/task-api/internal/service"
@@ -50,6 +53,33 @@ func (h *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+
+	json.NewEncoder(w).Encode(task)
+}
+
+func (h *TaskHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	task, err := h.service.GetByID(id)
+
+	if err != nil {
+
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "task not found", http.StatusNotFound)
+			return
+		}
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 
 	json.NewEncoder(w).Encode(task)
 }
