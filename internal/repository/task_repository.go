@@ -97,3 +97,49 @@ func (r *TaskRepository) GetByID(id int) (*model.Task, error) {
 
 	return &task, nil
 }
+
+func (r *TaskRepository) Update(task *model.Task) error {
+
+	query := `
+		UPDATE tasks
+		SET
+			title = $1,
+			description = $2,
+			completed = $3,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = $4
+		RETURNING updated_at
+	`
+
+	return r.db.QueryRow(
+		query,
+		task.Title,
+		task.Description,
+		task.Completed,
+		task.ID,
+	).Scan(&task.UpdatedAt)
+}
+
+func (r *TaskRepository) Delete(id int) error {
+
+	query := `
+		DELETE FROM tasks
+		WHERE id = $1
+	`
+
+	result, err := r.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}

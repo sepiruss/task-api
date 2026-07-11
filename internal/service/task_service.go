@@ -34,3 +34,18 @@ func (s *TaskService) GetByID(id int) (*model.Task, error) {
 	return s.repo.GetByID(id)
 
 }
+
+func (s *TaskService) Update(task *model.Task) error {
+
+	if strings.TrimSpace(task.Title) == "" {
+		return errors.New("title is required")
+	}
+
+	return s.repo.Update(task)
+}
+
+func (s *TaskService) Delete(id int) error {
+
+	return s.repo.Delete(id)
+
+}
