@@ -4,14 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
+
 	"github.com/sepiruss/task-api/internal/config"
 )
 
 func Connect(cfg *config.Config) *sql.DB {
 
-	connStr := fmt.Sprintf(
+	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.DBHost,
 		cfg.DBPort,
@@ -21,19 +23,27 @@ func Connect(cfg *config.Config) *sql.DB {
 		cfg.DBSSLMode,
 	)
 
-	db, err := sql.Open("postgres", connStr)
+	var db *sql.DB
+	var err error
 
-	if err != nil {
-		log.Fatal(err)
+	for i := 1; i <= 10; i++ {
+
+		db, err = sql.Open("postgres", dsn)
+		if err == nil {
+
+			err = db.Ping()
+			if err == nil {
+				log.Println("Connected to PostgreSQL")
+				return db
+			}
+		}
+
+		log.Printf("Database not ready... retry %d/10", i)
+
+		time.Sleep(3 * time.Second)
 	}
 
-	err = db.Ping()
+	log.Fatal(err)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("✅ Connected to PostgreSQL")
-
-	return db
+	return nil
 }

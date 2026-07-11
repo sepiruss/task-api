@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   postgres:
@@ -17,13 +15,38 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    image: migrate/migrate
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    volumes:
+      - ./migrations:/migrations
+
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:postgres@postgres:5432/task_api?sslmode=disable",
+        "up"
+      ]
+
   api:
     build: .
-
     container_name: task-api
 
     depends_on:
-      - postgres
+      migrate:
+        condition: service_completed_successfully
 
     ports:
       - "8080:8080"
